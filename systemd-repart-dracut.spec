@@ -34,7 +34,7 @@ License:        MIT
 URL:            https://github.com/schubi2/systemd-repart-dracut
 Source:         systemd-repart-dracut-%{version}.tar
 BuildRequires:  systemd-rpm-macros
-ExclusiveArch:  aarch64 ppc64le riscv64 x86_64
+ExclusiveArch:  aarch64 ppc64le powerpc64le riscv64 x86_64
 BuildArch:      noarch
 %{?systemd_requires}
 
