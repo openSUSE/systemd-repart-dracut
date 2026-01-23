@@ -22,4 +22,5 @@ install() {
 		$SYSTEMCTL -q --root "$initdir" enable "$service"
 		#$SYSTEMCTL -q --root "$initdir" enable "debug-shell.service"
 	done
+	rm -f "$initdir"/usr/lib/systemd/system/initrd-root-fs.target.wants/systemd-repart.service
 }

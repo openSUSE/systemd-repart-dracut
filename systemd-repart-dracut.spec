@@ -31,7 +31,7 @@ Version:        1+git20241007.a97aa3c%{git_version}
 Release:        0
 Summary:        Systemd-repart service dracut module
 License:        MIT
-URL:            https://github.com/schubi2/systemd-repart-dracut
+URL:            https://github.com/openSUSE/systemd-repart-dracut
 Source:         systemd-repart-dracut-%{version}.tar
 BuildRequires:  systemd-rpm-macros
 ExclusiveArch:  aarch64 ppc64le powerpc64le riscv64 x86_64

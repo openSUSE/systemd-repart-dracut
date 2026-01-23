@@ -8,10 +8,6 @@ unset "${!LC_@}"
 LANG="C.utf8"
 export LANG
 
-blkdev=
-blkpart=
-mp=
-
 log_info()
 {
 	echo "$@"
@@ -28,19 +24,21 @@ err()
 
 [ -e /etc/initrd-release ] || err "No initrd environment"
 
-mp="/sysroot"
-mountpoint -q "${mp}" || err "${mp} is not a valid mountpoint"
-blkpart="$(findmnt -nvo SOURCE "$mp")"
-[ -L "/sys/class/block/${blkpart##*/}" ] || err "$blkpart is not a partition"
-blkdev="$(readlink -f "/sys/class/block/${blkpart##*/}")"
-blkdev="${blkdev%/*}"
-blkdev="/dev/${blkdev##*/}"
-
-if [ -d "/etc/repart.d" ]; then
-	log_info "Reparting with systemd-repart: ${blkdev}"
-	/usr/bin/systemd-repart --definitions="/etc/repart.d" --dry-run=no ${blkdev}
-else
-	log_info "No systemd-repart configuration files found"
+# Need to write to /sysroot/etc/fstab to add new partitions
+if ! [ -w /sysroot/etc ]; then
+        # Transactional systems have a separate mount for /etc.
+        # In the nested subvolume setup there's a bind mount that is read-only at first.
+        if findmnt /sysroot/etc >/dev/null; then
+                mount -o remount,rw /sysroot/etc
+        else
+                mount -o remount,rw /sysroot
+        fi
 fi
 
+# Delete the systemd-repart marker in /sysroot/etc/fstab, or systemd-repart
+# can remove entries it should not
+sed -i -e 's|# .*section.*of automatically generated fstab by systemd-repart||g' /sysroot/etc/fstab
+
+log_info "Reparting with systemd-repart:"
+/usr/bin/systemd-repart --dry-run=no --append-fstab=auto --generate-fstab=/etc/fstab
 log_info "Repartition completed"

@@ -1,16 +1,30 @@
 [Unit]
 Description=Resize disks with systemd-repart
-DefaultDependencies=false
+Documentation=man:systemd-repart.service(8)
 
+ConditionVirtualization=!container
+ConditionDirectoryNotEmpty=|/usr/lib/repart.d
+ConditionDirectoryNotEmpty=|/usr/local/lib/repart.d
+ConditionDirectoryNotEmpty=|/etc/repart.d
+ConditionDirectoryNotEmpty=|/run/repart.d
+ConditionDirectoryNotEmpty=|/sysusr/usr/lib/repart.d
+ConditionDirectoryNotEmpty=|/sysusr/usr/local/lib/repart.d
+
+DefaultDependencies=no
+Wants=modprobe@loop.service modprobe@dm_mod.service
+After=initrd-usr-fs.target modprobe@loop.service modprobe@dm_mod.service
+Before=initrd-root-fs.target
+Conflicts=shutdown.target initrd-switch-root.target
+Before=shutdown.target initrd-switch-root.target
+
+# Additional for combustion:
 After=combustion.service
-
-# After ignition completed its stuff
 After=ignition-complete.target
-
+# Create partitions before d-e-t is running
 Before=disk-encryption-tool-dracut.service
 
-Conflicts=initrd-switch-root.target umount.target
-Conflicts=dracut-emergency.service emergency.service emergency.target
+#Conflicts=initrd-switch-root.target umount.target
+#Conflicts=dracut-emergency.service emergency.service emergency.target
 
 # Without this it goes into an endless loop on failure
 OnFailure=emergency.target
@@ -18,8 +32,13 @@ OnFailureJobMode=isolate
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/bin/systemd-repart-dracut
 StandardOutput=journal+console
+# The tool returns 76 if it can't find the root block device
+SuccessExitStatus=76
+# The tool returns 77 if there's no existing GPT partition table
+SuccessExitStatus=77
 
 [Install]
 RequiredBy=firstboot.target
