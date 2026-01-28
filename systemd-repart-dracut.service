@@ -11,9 +11,9 @@ ConditionDirectoryNotEmpty=|/sysusr/usr/lib/repart.d
 ConditionDirectoryNotEmpty=|/sysusr/usr/local/lib/repart.d
 
 DefaultDependencies=no
+# systemd-repart.service dependencies:
 Wants=modprobe@loop.service modprobe@dm_mod.service
 After=initrd-usr-fs.target modprobe@loop.service modprobe@dm_mod.service
-Before=initrd-root-fs.target
 Conflicts=shutdown.target initrd-switch-root.target
 Before=shutdown.target initrd-switch-root.target
 
@@ -23,7 +23,7 @@ After=ignition-complete.target
 # Create partitions before d-e-t is running
 Before=disk-encryption-tool-dracut.service
 
-#Conflicts=initrd-switch-root.target umount.target
+#Conflicts=umount.target
 #Conflicts=dracut-emergency.service emergency.service emergency.target
 
 # Without this it goes into an endless loop on failure
