@@ -35,10 +35,6 @@ if ! [ -w /sysroot/etc ]; then
         fi
 fi
 
-# Delete the systemd-repart marker in /sysroot/etc/fstab, or systemd-repart
-# can remove entries it should not
-sed -i -e 's|# .*section.*of automatically generated fstab by systemd-repart||g' /sysroot/etc/fstab
-
 log_info "Reparting with systemd-repart:"
 /usr/bin/systemd-repart --dry-run=no --append-fstab=auto --generate-fstab=/etc/fstab
 log_info "Repartition completed"
