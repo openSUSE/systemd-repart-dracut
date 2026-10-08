@@ -56,6 +56,12 @@ if grep -Eq "$etc_entry" /sysroot/etc/fstab; then
 		err "Failed to remove the /etc entry from /run/fstab.dracut"
 fi
 
+# ESP could be mounted inside initrd already and is not needed by
+# systemd-repart.
+esp_entry='^[^#]*[[:space:]](/boot/efi|/efi|/boot)[[:space:]]+vfat([[:space:]]|$)'
+sed -E "\\%$esp_entry%d" -i /run/fstab.dracut ||
+	err "Failed to remove the ESP entry from /run/fstab.dracut"
+
 # Ensure that all mountpoints are mounted so that systemd-repart CopyFiles work
 # properly, because only /sysroot is mounted when systemd-repart-dracut runs
 log_info "Mounting all filesystems from fstab"
