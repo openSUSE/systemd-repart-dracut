@@ -44,6 +44,16 @@ trap cleanup EXIT
 # Copy this file so that we can use it to mount all partitions later
 cp /sysroot/etc/fstab /run/fstab.dracut || err "Failed to copy /sysroot/etc/fstab"
 
+# /sysroot is already mounted, so skip the / entry. libmount does not
+# detect it as mounted when it is a btrfs without subvol= (the default
+# subvolume is looked up in /, without the --target-prefix), and mounts
+# it again on top of /sysroot. The unmount loop below cannot see this
+# second mount, as the mountpoint was already in /run/mount.before, so
+# it would be left stacked over /sysroot
+root_entry='^[^#]*[[:space:]]/([[:space:]]|$)'
+sed -E "\\%$root_entry%d" -i /run/fstab.dracut ||
+	err "Failed to remove the / entry from /run/fstab.dracut"
+
 bind_etc=false
 # Only MicroOS has /etc bind mount. Match /etc as the mountpoint field only, a
 # substring match would also catch comments and paths like /etc-backup
